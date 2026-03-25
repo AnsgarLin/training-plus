@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Wireframe – Scan QR Flow</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:40px 20px 60px;display:flex;flex-direction:column;align-items:center;gap:40px;}
+
+/* ── Titles ── */
+.section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;align-self:flex-start;max-width:1080px;width:100%;}
+
+/* ── Flow row ── */
+.flow-row{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;justify-content:center;}
+.flow-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.flow-label{font-size:11px;font-weight:600;color:#555;text-align:center;max-width:160px;}
+.flow-arrow{font-size:22px;color:#bbb;align-self:center;margin-top:52px;}
+.flow-sub{font-size:10px;color:#aaa;text-align:center;max-width:140px;line-height:1.5;}
+
+/* ── Gap badge ── */
+.gap-badge{background:#e74c3c;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.04em;}
+.fix-badge{background:#27ae60;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.04em;}
+
+/* ── Phone shell ── */
+:root{
+  --bg:#fff;--bg2:#f7f7f5;--bg3:#f0efea;
+  --txt:#1a1a1a;--txt2:#666;--txt3:#aaa;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --radius:10px;--radius-lg:14px;
+}
+.phone{width:320px;background:var(--bg);border-radius:36px;box-shadow:0 20px 56px rgba(0,0,0,0.16),0 0 0 7px #c8c8c8;overflow:hidden;display:flex;flex-direction:column;flex-shrink:0;}
+.phone.sm{width:280px;}
+.notch{height:30px;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+.notch-bar{width:100px;height:4px;background:#ccc;border-radius:2px;}
+.screen{display:flex;flex-direction:column;flex:1;}
+.home-bar{height:26px;display:flex;align-items:center;justify-content:center;}
+.home-ind{width:100px;height:4px;background:#ccc;border-radius:2px;}
+
+/* ── App chrome ── */
+.topbar{height:48px;background:var(--bg);border-bottom:.5px solid var(--border);display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;}
+.tb-back{font-size:13px;color:var(--txt2);}
+.tb-title{flex:1;font-size:15px;font-weight:600;text-align:center;}
+.crumb{font-size:9px;color:var(--txt3);background:var(--bg2);padding:3px 12px;border-bottom:.5px solid var(--border);}
+.scroll-body{flex:1;padding:12px;display:flex;flex-direction:column;gap:10px;}
+
+/* ── Import option card (old style) ── */
+.import-opt{display:flex;align-items:center;gap:12px;padding:13px;border:.5px solid var(--border);border-radius:12px;background:var(--bg);}
+.import-opt-icon{width:36px;height:36px;border-radius:9px;background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--txt2);}
+.import-opt-t{font-size:13px;font-weight:600;}
+.import-opt-s{font-size:10px;color:var(--txt2);margin-top:2px;}
+
+/* ── Camera area ── */
+.cam-area{width:100%;aspect-ratio:1/1;border-radius:14px;background:#111;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.cam-feed{width:100%;height:100%;object-fit:cover;opacity:.18;}/* simulated grey */
+.cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.cam-frame{width:55%;aspect-ratio:1/1;border-radius:10px;border:2px solid rgba(255,255,255,0.7);position:relative;}
+.cam-corner{position:absolute;width:16px;height:16px;}
+.cam-corner.tl{top:-1px;left:-1px;border-top:3px solid #fff;border-left:3px solid #fff;border-radius:4px 0 0 0;}
+.cam-corner.tr{top:-1px;right:-1px;border-top:3px solid #fff;border-right:3px solid #fff;border-radius:0 4px 0 0;}
+.cam-corner.bl{bottom:-1px;left:-1px;border-bottom:3px solid #fff;border-left:3px solid #fff;border-radius:0 0 0 4px;}
+.cam-corner.br{bottom:-1px;right:-1px;border-bottom:3px solid #fff;border-right:3px solid #fff;border-radius:0 0 4px 0;}
+.cam-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,.6);}
+
+/* ── Image preview state ── */
+.img-preview{width:100%;border-radius:10px;background:var(--bg3);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.img-preview svg{opacity:.25;}
+
+/* ── Buttons ── */
+.btn-filled{height:42px;border-radius:10px;background:var(--txt);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;}
+.btn-outline{height:42px;border-radius:10px;border:.5px solid var(--border2);background:var(--bg);color:var(--txt);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;}
+
+/* ── Error banner ── */
+.err-banner{background:#fde8e8;color:#c81e1e;font-size:11px;padding:8px 10px;border-radius:7px;}
+
+/* ── Annotation dots ── */
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-top:3px;}
+.dot-r{background:#e74c3c;}.dot-g{background:#27ae60;}.dot-o{background:#e67e22;}
+
+/* ── Legend box ── */
+.legend{max-width:680px;width:100%;background:#fff;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+.leg-row{display:flex;gap:8px;font-size:12px;color:#444;line-height:1.5;}
+
+/* ── Strikethrough overlay (old) ── */
+.phone-old{position:relative;}
+.phone-old::after{content:"BEFORE";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-20deg);font-size:32px;font-weight:900;color:rgba(200,0,0,0.12);pointer-events:none;letter-spacing:2px;}
+
+/* ── Separator ── */
+.sep{width:100%;max-width:720px;border:none;border-top:.5px solid #ccc;margin:8px 0;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SECTION 1: FULL FLOW ═══════════════ -->
+<div class="section-title">Import Flow — full screen sequence</div>
+<div class="flow-row">
+
+  <!-- 1 · Import choose -->
+  <div class="flow-col">
+    <div class="flow-label">① Import Day<br><span class="fix-badge">unchanged</span></div>
+    <div class="phone sm">
+      <div class="notch"><div class="notch-bar"></div></div>
+      <div class="screen">
+        <div class="topbar"><div class="tb-back">‹ Cancel</div><div class="tb-title">Import day</div></div>
+        <div class="scroll-body" style="gap:12px;padding-top:14px;">
+          <div style="font-size:12px;color:var(--txt2);">Choose how to import:</div>
+          <div class="import-opt">
+            <div class="import-opt-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 5H5v4M5 9l6-6M15 5h4v4M19 9l-6-6M9 19H5v-4M5 15l6 6M15 19h4v-4M19 15l-6 6"/></svg>
+            </div>
+            <div><div class="import-opt-t">Scan QR code</div><div class="import-opt-s">Camera or upload image</div></div>
+          </div>
+          <div class="import-opt">
+            <div class="import-opt-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </div>
+            <div><div class="import-opt-t">Paste text</div><div class="import-opt-s">Paste exported plain-text</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="home-bar"><div class="home-ind"></div></div>
+    </div>
+    <div class="flow-sub">Tap "Scan QR code"</div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- 2 · Scan page NEW -->
+  <div class="flow-col">
+    <div class="flow-label">② Scan QR code<br><span class="fix-badge">redesigned</span></div>
+    <div class="phone sm">
+      <div class="notch"><div class="notch-bar"></div></div>
+      <div class="screen">
+        <div class="topbar"><div class="tb-back">‹ Back</div><div class="tb-title">Scan QR code</div></div>
+        <div class="crumb">Camera starts automatically</div>
+        <div class="scroll-body" style="gap:12px;">
+          <!-- live camera area -->
+          <div class="cam-area">
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);"></div>
+            <div class="cam-overlay">
+              <div class="cam-frame">
+                <div class="cam-corner tl"></div>
+                <div class="cam-corner tr"></div>
+                <div class="cam-corner bl"></div>
+                <div class="cam-corner br"></div>
+              </div>
+            </div>
+            <div class="cam-hint">Point at a QR code</div>
+          </div>
+          <!-- single upload button -->
+          <div class="btn-outline" id="imp-upload-file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Upload from camera roll or file
+          </div>
+          <div style="font-size:10px;color:var(--txt3);text-align:center;">or use the camera above to scan live</div>
+        </div>
+      </div>
+      <div class="home-bar"><div class="home-ind"></div></div>
+    </div>
+    <div class="flow-sub">Camera starts on load.<br>Single upload button below.</div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- 3 · Image uploaded state -->
+  <div class="flow-col">
+    <div class="flow-label">③ Image selected<br><span class="fix-badge">auto-decode</span></div>
+    <div class="phone sm">
+      <div class="notch"><div class="notch-bar"></div></div>
+      <div class="screen">
+        <div class="topbar"><div class="tb-back">‹ Back</div><div class="tb-title">Scan QR code</div></div>
+        <div class="crumb">Decoding image…</div>
+        <div class="scroll-body" style="gap:12px;">
+          <div class="img-preview">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </div>
+          <div style="font-size:11px;color:var(--txt2);text-align:center;">Scanning for QR code…</div>
+          <div class="btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Choose a different image
+          </div>
+        </div>
+      </div>
+      <div class="home-bar"><div class="home-ind"></div></div>
+    </div>
+    <div class="flow-sub">Auto-decodes on image pick.<br>No extra "Scan" tap needed.</div>
+  </div>
+
+  <div class="flow-arrow">→</div>
+
+  <!-- 4 · Import preview -->
+  <div class="flow-col">
+    <div class="flow-label">④ Import preview<br><span class="fix-badge">unchanged</span></div>
+    <div class="phone sm">
+      <div class="notch"><div class="notch-bar"></div></div>
+      <div class="screen">
+        <div class="topbar"><div class="tb-back">‹ Back</div><div class="tb-title">Import preview</div></div>
+        <div class="scroll-body" style="gap:10px;">
+          <div style="font-size:11px;color:var(--txt2);">Review before importing:</div>
+          <div style="background:var(--bg2);border-radius:10px;padding:10px;font-family:monospace;font-size:10px;line-height:1.8;color:var(--txt2);">
+            <div style="color:var(--txt);font-weight:700;">D3</div>
+            <div style="color:var(--txt);font-weight:600;">3 Sets | rest 2 min</div>
+            <div style="padding-left:10px;">Squat | 10 Reps | 80 kg</div>
+            <div style="padding-left:10px;">Lunge | 12 Reps</div>
+            <div style="color:var(--txt);font-weight:600;margin-top:4px;">2 Sets</div>
+            <div style="padding-left:10px;">Push-up | 15 Reps</div>
+          </div>
+          <div style="font-size:10px;color:var(--txt3);">2 sets · 3 actions · D3</div>
+          <div class="btn-filled">Import</div>
+        </div>
+      </div>
+      <div class="home-bar"><div class="home-ind"></div></div>
+    </div>
+    <div class="flow-sub">Confirm then import</div>
+  </div>
+
+</div>
+
+<hr class="sep"/>
+
+<!-- ═══════════════ SECTION 2: GAPS vs FIXES ═══════════════ -->
+<div class="section-title">Flow gaps &amp; fixes</div>
+
+<div class="legend">
+  <div class="leg-row">
+    <div class="dot dot-r"></div>
+    <div><strong>Gap 1 — Missing DOM elements:</strong> <code>startScanner()</code> looks for <code>#scan-video</code> and <code>#scan-canvas</code>, but the current scan HTML never renders them. Camera silently fails every time.</div>
+  </div>
+  <div class="leg-row">
+    <div class="dot dot-r"></div>
+    <div><strong>Gap 2 — Camera not auto-started:</strong> User taps "Use camera" but the view re-renders the same two-button layout (no video element in DOM), so <code>startScanner()</code> exits immediately on <code>if(!video||!canvas)return</code>.</div>
+  </div>
+  <div class="leg-row">
+    <div class="dot dot-r"></div>
+    <div><strong>Gap 3 — Upload requires manual decode tap:</strong> After picking an image, the user still has to press "Scan QR from this image" — this step adds friction with no benefit.</div>
+  </div>
+  <div class="leg-row">
+    <div class="dot dot-g"></div>
+    <div><strong>Fix 1 — Render video + canvas in scan HTML:</strong> Add <code>&lt;video id="scan-video"&gt;</code> (styled as camera area) and a hidden <code>&lt;canvas id="scan-canvas"&gt;</code> directly in the scan template so <code>startScanner()</code> always finds them.</div>
+  </div>
+  <div class="leg-row">
+    <div class="dot dot-g"></div>
+    <div><strong>Fix 2 — Auto-start camera on scan view:</strong> Call <code>startScanner()</code> immediately when entering <code>importView='scan'</code> instead of waiting for a "Use camera" tap. Remove the two-button choice entirely.</div>
+  </div>
+  <div class="leg-row">
+    <div class="dot dot-g"></div>
+    <div><strong>Fix 3 — Auto-decode on image pick:</strong> After file input fires and <code>importImageSrc</code> is set, immediately call <code>decodeQRFromImage()</code> — no "Scan QR" button needed.</div>
+  </div>
+</div>
+
+<hr class="sep"/>
+
+<!-- ═══════════════ SECTION 3: BEFORE / AFTER CLOSEUP ═══════════════ -->
+<div class="section-title">Before vs After — Scan page</div>
+<div class="flow-row" style="align-items:flex-start;gap:40px;">
+
+  <!-- BEFORE -->
+  <div class="flow-col">
+    <div class="flow-label">Before<br><span class="gap-badge">2 bugs · extra tap</span></div>
+    <div class="phone phone-old">
+      <div class="notch"><div class="notch-bar"></div></div>
+      <div class="screen">
+        <div class="topbar"><div class="tb-back">‹ Back</div><div class="tb-title">Scan QR code</div></div>
+        <div class="scroll-body" style="gap:12px;padding-top:14px;">
+          <div style="font-size:12px;color:var(--txt2);">Choose how to scan:</div>
+          <div class="import-opt">
+            <div class="import-opt-icon" style="color:#c0392b;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <div>
+              <div class="import-opt-t" style="color:#c0392b;">Use camera</div>
+              <div class="import-opt-s" style="color:#c0392b;">⚠ scan-video never in DOM</div>
+            </div>
+          </div>
+          <div class="import-opt">
+            <div class="import-opt-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div><div class="import-opt-t">Upload from camera roll or file</div></div>
+          </div>
+          <div style="height:8px"></div>
+          <!-- After upload: manual decode step -->
+          <div style="border-top:.5px dashed var(--border);padding-top:10px;font-size:10px;color:var(--txt3);">After picking image:</div>
+          <div class="btn-filled" style="opacity:.5;">Scan QR from this image ← extra tap</div>
+        </div>
+      </div>
+      <div class="home-bar"><div class="home-ind"></div></div>
+    </div>
+  </div>
+
+  <!-- AFTER -->
+  <div class="flow-col">
+    <div class="flow-label">After<br><span class="fix-badge">camera works · fewer taps</span></div>
+    <div class="phone">
+      <div class="notch"><div class="notch-bar"></div></div>
+      <div class="screen">
+        <div class="topbar"><div class="tb-back">‹ Back</div><div class="tb-title">Scan QR code</div></div>
+        <div class="scroll-body" style="gap:12px;">
+          <!-- live camera (video + canvas rendered in DOM) -->
+          <div class="cam-area" style="aspect-ratio:4/3;">
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);"></div>
+            <!-- hidden canvas sits behind -->
+            <div class="cam-overlay">
+              <div class="cam-frame">
+                <div class="cam-corner tl"></div>
+                <div class="cam-corner tr"></div>
+                <div class="cam-corner bl"></div>
+                <div class="cam-corner br"></div>
+              </div>
+            </div>
+            <div class="cam-hint">Point at a QR code to scan</div>
+            <!-- DOM labels -->
+            <div style="position:absolute;top:8px;left:8px;font-size:8px;background:rgba(39,174,96,.85);color:#fff;padding:2px 6px;border-radius:4px;">#scan-video</div>
+            <div style="position:absolute;top:8px;right:8px;font-size:8px;background:rgba(39,174,96,.85);color:#fff;padding:2px 6px;border-radius:4px;">#scan-canvas (hidden)</div>
+          </div>
+          <!-- single upload button -->
+          <div class="btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Upload from camera roll or file
+          </div>
+          <div style="font-size:10px;color:var(--txt3);text-align:center;">
+            Auto-decodes on image pick — no extra tap
+          </div>
+        </div>
+      </div>
+      <div class="home-bar"><div class="home-ind"></div></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
