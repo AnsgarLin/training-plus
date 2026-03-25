@@ -313,6 +313,11 @@ function loadStudent(fileId,name){
 // ── IMPORT / QR ───────────────────────────────────────────────────────────────
 function parseImportText(raw){
   if(!raw)return null;
+  if(raw.slice(0,3)==='lz:'){
+    var dec=window.LZString?window.LZString.decompressFromEncodedURIComponent(raw.slice(3)):null;
+    if(!dec)return null;
+    raw=dec;
+  }
   var lines=raw.trim().split('\n');
   var m=lines[0]&&lines[0].match(/^D(\d+)/i);
   if(!m)return null;
@@ -383,19 +388,30 @@ function loadQRLib(cb){
   s.onload=function(){cb(window.QRCode);};
   document.head.appendChild(s);
 }
+function loadLZString(cb){
+  if(window.LZString){cb(window.LZString);return;}
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js';
+  s.onload=function(){cb(window.LZString);};
+  s.onerror=function(){cb(null);};
+  document.head.appendChild(s);
+}
 function renderQRCode(text,containerId){
   loadQRLib(function(QRCode){
-    var el=document.getElementById(containerId);
-    if(!el)return;
-    el.innerHTML='';
-    try{
-      new QRCode(el,{text:text,width:180,height:180,colorDark:'#1a1a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
-    }catch(e){
-      el.innerHTML='<div style="width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:12px;">'
-        +'<div style="font-size:28px;">⚠️</div>'
-        +'<div style="font-size:12px;color:var(--txt2);line-height:1.5;">Day is too long for a QR code.<br>Use <b>Copy</b> or <b>Share</b> instead.</div>'
-        +'</div>';
-    }
+    loadLZString(function(LZString){
+      var el=document.getElementById(containerId);
+      if(!el)return;
+      el.innerHTML='';
+      var payload=LZString?'lz:'+LZString.compressToEncodedURIComponent(text):text;
+      try{
+        new QRCode(el,{text:payload,width:180,height:180,colorDark:'#1a1a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
+      }catch(e){
+        el.innerHTML='<div style="width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:12px;">'
+          +'<div style="font-size:28px;">⚠️</div>'
+          +'<div style="font-size:12px;color:var(--txt2);line-height:1.5;">Day is too long for a QR code.<br>Use <b>Copy</b> or <b>Share</b> instead.</div>'
+          +'</div>';
+      }
+    });
   });
 }
 function loadJsQR(cb){
