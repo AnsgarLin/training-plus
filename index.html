@@ -115,6 +115,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .import-opt:active{background:var(--bg2);}
 .import-opt-icon{width:40px;height:40px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 #qr-file-input{display:none;}
+.prev-block{background:var(--bg2);border-radius:var(--radius-lg);padding:14px;display:flex;flex-direction:column;gap:0;}
+.prev-set{font-size:13px;font-weight:600;color:var(--txt);padding:3px 0;margin-top:6px;}
+.prev-set:first-child{margin-top:0;}
+.prev-act{font-size:12px;color:var(--txt2);padding:2px 0 2px 12px;line-height:1.5;}
+.prev-actions{display:flex;gap:8px;}
+.prev-btn{flex:1;height:42px;border:0.5px solid var(--border2);border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:500;color:var(--txt);cursor:pointer;}
+.prev-btn:active{background:var(--bg2);}
+.sel-box{display:flex;flex-direction:column;gap:6px;}
+.sel-hint{font-size:11px;color:var(--txt3);}
+.sel-text{width:100%;min-height:100px;border:0.5px solid var(--border2);border-radius:8px;background:var(--bg2);padding:8px 10px;font-size:11px;font-family:monospace;color:var(--txt2);resize:none;outline:none;line-height:1.7;}
 </style>
 </head>
 <body>
@@ -378,7 +388,14 @@ function renderQRCode(text,containerId){
     var el=document.getElementById(containerId);
     if(!el)return;
     el.innerHTML='';
-    new QRCode(el,{text:text,width:180,height:180,colorDark:'#1a1a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    try{
+      new QRCode(el,{text:text,width:180,height:180,colorDark:'#1a1a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.L});
+    }catch(e){
+      el.innerHTML='<div style="width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:12px;">'
+        +'<div style="font-size:28px;">⚠️</div>'
+        +'<div style="font-size:12px;color:var(--txt2);line-height:1.5;">Day is too long for a QR code.<br>Use <b>Copy</b> or <b>Share</b> instead.</div>'
+        +'</div>';
+    }
   });
 }
 function loadJsQR(cb){
@@ -559,6 +576,7 @@ function renderView(){
   if(v==='setEdit')return renderSetEdit();
   if(v==='actionEdit')return renderActionEdit();
   if(v==='preview')return renderPreview();
+  if(v==='qr')return renderQR();
   if(v==='import')return renderImport();
   return '';
 }
@@ -674,13 +692,20 @@ function renderActionEdit(){
 function renderPreview(){
   var txt=buildPreview(S.currentDayId);var lines=txt.split('\n');var htmlLines='';
   for(var i=0;i<lines.length;i++){var l=lines[i];if(l.indexOf('  ')===0)htmlLines+='<div class="prev-act">'+h(l.trim())+'</div>';else if(!l)htmlLines+='<div style="height:6px"></div>';else htmlLines+='<div class="prev-set">'+h(l)+'</div>';}
-  var qrSection=S.showQR?'<div style="background:var(--bg2);border-radius:12px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;"><div id="qr-container" style="background:#fff;padding:10px;border-radius:8px;"></div><div style="font-size:11px;color:var(--txt2);">Scan to import D'+S.currentDayId+'</div></div>':'';
   return '<div class="view"><div class="topbar"><div class="tb-back" id="back-sets-prev">&#8249; D'+S.currentDayId+'</div><div class="tb-title">Preview</div></div>'
     +'<div class="crumb">'+h(S.currentStudentName||'')+' / D'+S.currentDayId+' / Preview</div>'
     +'<div class="scroll-body"><div class="prev-block">'+htmlLines+'</div>'
     +'<div class="prev-actions"><div class="prev-btn" id="copy-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M3 11V3h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Copy</div><div class="prev-btn" id="share-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v11M9 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Share</div><div class="prev-btn" id="qr-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 5H5v4M5 9l6-6M15 5h4v4M19 9l-6-6M9 19H5v-4M5 15l6 6M15 19h4v-4M19 15l-6 6"/></svg> QR</div></div>'
-    +qrSection
     +'<div class="sel-box"><div class="sel-hint">If copy is blocked \u2014 select manually:</div><textarea class="sel-text" rows="6" readonly>'+txt+'</textarea></div></div></div>';
+}
+function renderQR(){
+  return '<div class="view"><div class="topbar"><div class="tb-back" id="back-preview-from-qr">&#8249; Preview</div><div class="tb-title">QR Code</div></div>'
+    +'<div class="crumb">'+h(S.currentStudentName||'')+' / D'+S.currentDayId+' / QR</div>'
+    +'<div class="scroll-body" style="align-items:center;justify-content:center;gap:20px;padding-top:32px;">'
+    +'<div id="qr-container" style="background:#fff;padding:14px;border-radius:14px;border:0.5px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.06);"></div>'
+    +'<div style="font-size:12px;color:var(--txt2);">Scan to import D'+S.currentDayId+'</div>'
+    +'<div class="btn-filled" id="qr-share-btn" style="width:100%;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M12 2v11M9 5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Share</div>'
+    +'</div></div>';
 }
 function renderImport(){
   var iv=S.importView||'choose';var html='';
@@ -779,7 +804,8 @@ function attachHandlers(){
   on('back-days',function(){S.deleteMode=false;S.view='days';render();});
   on('back-sets',function(){S.editingSet=null;S.deleteMode=false;S.view='sets';render();});
   on('back-set-edit',function(){S.editingAction=null;S.showInsertLink=false;S.showVidOpts=false;commitSet();S.view='setEdit';render();});
-  on('back-sets-prev',function(){S.showQR=false;S.view='sets';render();});
+  on('back-sets-prev',function(){S.view='sets';render();});
+  on('back-preview-from-qr',function(){S.view='preview';render();});
   on('add-student-btn',function(){var n=(prompt('Student name:','')||'').trim();if(!n)return;var name=n;while(S.studentFiles.some(function(s){return s.name.toLowerCase()===name.toLowerCase();})){var mm=name.match(/ (\d+)$/);name=mm?name.replace(/ \d+$/,' '+(parseInt(mm[1])+1)):name+' 2';}S.view='loading';S.syncMsg='Creating student\u2026';render();driveCreate(name+'.json',S.rootFolderId,{name:name,days:[]}).then(function(fid){S.currentData={name:name,days:[]};S.currentFileId=fid;S.currentStudentName=name;lastSavedSnapshot=snapshotKey();return refreshStudentList();}).then(function(){S.view='days';render();});});
   on('add-day-btn',function(){if(!S.currentData.days)S.currentData.days=[];var nid=maxDayId()+1;S.currentData.days.push({id:nid,deleted:false,sets:[]});S.currentDayId=nid;S.view='sets';render();});
   on('add-set-btn',function(){S.editingSet={id:null,rounds:1,rest:'',note:'',actions:[],deleted:false};S.view='setEdit';render();});
@@ -847,8 +873,9 @@ function attachHandlers(){
   // preview / share
   on('copy-btn',function(){var txt=buildPreview(S.currentDayId);if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast('Copied!');}).catch(function(){toast('Use the text box below');});else toast('Use the text box below');});
   on('share-btn',function(){var txt=buildPreview(S.currentDayId);if(navigator.share)navigator.share({text:txt}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast('Copied!');});});
-  on('qr-btn',function(){S.showQR=!S.showQR;render();if(S.showQR)setTimeout(function(){renderQRCode(buildPreview(S.currentDayId),'qr-container');},100);});
-  if(S.showQR&&document.getElementById('qr-container'))setTimeout(function(){renderQRCode(buildPreview(S.currentDayId),'qr-container');},50);
+  on('qr-btn',function(){S.view='qr';render();setTimeout(function(){renderQRCode(buildPreview(S.currentDayId),'qr-container');},100);});
+  on('qr-share-btn',function(){var txt=buildPreview(S.currentDayId);if(navigator.share)navigator.share({text:txt}).catch(function(){});else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast('Copied!');});});
+  if(S.view==='qr'&&document.getElementById('qr-container'))setTimeout(function(){renderQRCode(buildPreview(S.currentDayId),'qr-container');},50);
   // import
   on('import-day-btn',function(){S.importView='choose';S.importText='';S.importParsed=null;S.importError='';S.importImageSrc=null;S.view='import';render();});
   on('import-cancel',function(){stopScanner();S.importImageSrc=null;S.view='days';render();});
