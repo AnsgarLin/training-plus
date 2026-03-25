@@ -125,6 +125,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .sel-box{display:flex;flex-direction:column;gap:6px;}
 .sel-hint{font-size:11px;color:var(--txt3);}
 .sel-text{width:100%;min-height:100px;border:0.5px solid var(--border2);border-radius:8px;background:var(--bg2);padding:8px 10px;font-size:11px;font-family:monospace;color:var(--txt2);resize:none;outline:none;line-height:1.7;}
+.cam-area{position:relative;width:100%;background:#000;border-radius:14px;overflow:hidden;}
+.cam-area video{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;}
+.cam-finder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.cam-finder-inner{width:58%;aspect-ratio:1;position:relative;}
+.cam-corner{position:absolute;width:18px;height:18px;border-color:rgba(255,255,255,0.85);border-style:solid;border-width:0;}
+.cam-tl{top:0;left:0;border-top-width:2.5px;border-left-width:2.5px;border-top-left-radius:4px;}
+.cam-tr{top:0;right:0;border-top-width:2.5px;border-right-width:2.5px;border-top-right-radius:4px;}
+.cam-bl{bottom:0;left:0;border-bottom-width:2.5px;border-left-width:2.5px;border-bottom-left-radius:4px;}
+.cam-br{bottom:0;right:0;border-bottom-width:2.5px;border-right-width:2.5px;border-bottom-right-radius:4px;}
+.cam-hint{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,0.6);}
 </style>
 </head>
 <body>
@@ -466,10 +476,12 @@ function setupFileInput(){
     var file=e.target.files&&e.target.files[0];
     if(!file)return;
     if(S.importImageSrc)URL.revokeObjectURL(S.importImageSrc);
+    stopScanner();
     S.importImageSrc=URL.createObjectURL(file);
     S.importError='';
     fi.value='';
     render();
+    setTimeout(decodeQRFromImage,100);
   });
 }
 function decodeQRFromImage(){
@@ -738,19 +750,24 @@ function renderImport(){
       +(S.importError?'<div style="font-size:11px;color:var(--danger-txt);background:var(--danger-bg);padding:8px 10px;border-radius:7px;">'+S.importError+'</div>':'')
       +'<div class="btn-filled" id="imp-preview-btn">Preview import</div></div></div>';
   }else if(iv==='scan'){
+    var uploadBtn='<div class="btn-outline" id="imp-upload-file"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>'+(S.importImageSrc?' Choose a different image':' Upload from camera roll or file')+'</div>';
+    var errHtml=S.importError?'<div style="font-size:11px;color:var(--danger-txt);background:var(--danger-bg);padding:8px 10px;border-radius:7px;">'+S.importError+'</div>':'';
+    var bodyHtml=S.importImageSrc
+      ?'<img src="'+S.importImageSrc+'" style="width:100%;border-radius:10px;display:block;"/>'
+       +'<div style="font-size:12px;color:var(--txt2);text-align:center;">'+(S.importError?'':'Scanning image\u2026')+'</div>'
+       +errHtml+uploadBtn
+      :'<div class="cam-area">'
+       +'<video id="scan-video" autoplay playsinline muted></video>'
+       +'<canvas id="scan-canvas" style="display:none;"></canvas>'
+       +'<div class="cam-finder"><div class="cam-finder-inner">'
+       +'<div class="cam-corner cam-tl"></div><div class="cam-corner cam-tr"></div>'
+       +'<div class="cam-corner cam-bl"></div><div class="cam-corner cam-br"></div>'
+       +'</div></div>'
+       +'<div class="cam-hint">Point at a QR code</div>'
+       +'</div>'
+       +errHtml+uploadBtn;
     html='<div class="view"><div class="topbar"><div class="tb-back" id="imp-back-choose">&#8249; Back</div><div class="tb-title">Scan QR code</div></div>'
-      +'<div class="scroll-body" style="gap:12px;padding-top:16px;">'
-      +(S.importImageSrc
-        ?'<div style="font-size:13px;color:var(--txt2);">Image loaded — ready to scan:</div>'
-         +'<img src="'+S.importImageSrc+'" style="width:100%;border-radius:10px;display:block;"/>'
-         +'<div class="btn-filled" id="imp-decode-btn">Scan QR from this image</div>'
-         +'<div class="import-opt" id="imp-upload-file"><div class="import-opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div style="font-size:14px;font-weight:600;">Choose a different image</div></div></div>'
-        :'<div style="font-size:13px;color:var(--txt2);">Choose how to scan:</div>'
-         +'<div class="import-opt" id="imp-scan-camera"><div class="import-opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div><div style="font-size:14px;font-weight:600;">Use camera</div><div style="font-size:11px;color:var(--txt2);margin-top:2px;">Point camera at a QR code</div></div></div>'
-         +'<div class="import-opt" id="imp-upload-file"><div class="import-opt-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div style="font-size:14px;font-weight:600;">Upload from camera roll or file</div><div style="font-size:11px;color:var(--txt2);margin-top:2px;">Pick an image with a QR code</div></div></div>'
-      )
-      +(S.importError?'<div style="font-size:11px;color:var(--danger-txt);background:var(--danger-bg);padding:8px 10px;border-radius:7px;">'+S.importError+'</div>':'')
-      +'</div></div>';
+      +'<div class="scroll-body" style="gap:12px;">'+bodyHtml+'</div></div>';
   }else if(iv==='preview'&&S.importParsed){
     var p=S.importParsed;var plines=['D'+p.dayId];
     for(var pi=0;pi<p.sets.length;pi++){var pset=p.sets[pi];var sl=pset.rounds+' Set'+(pset.rounds>1?'s':'');if(pset.rest)sl+=' | rest '+pset.rest+' min';if(pset.note)sl+=' | '+pset.note;plines.push(sl);for(var pj=0;pj<pset.actions.length;pj++){var pa=pset.actions[pj];var al='  '+pa.name;if(pa.reps)al+=' | '+pa.reps+' Reps';if(pa.duration)al+=' | '+pa.duration;if(pa.weight)al+=' | '+pa.weight;if(pa.note)al+=' | '+pa.note;if(pa.videoUrl)al+=' | '+shortUrl(pa.videoUrl);plines.push(al);}plines.push('');}
@@ -897,14 +914,12 @@ function attachHandlers(){
   on('import-cancel',function(){stopScanner();S.importImageSrc=null;S.view='days';render();});
   on('imp-back-choose',function(){stopScanner();if(S.importImageSrc)URL.revokeObjectURL(S.importImageSrc);S.importImageSrc=null;S.importView='choose';S.importError='';render();});
   on('imp-back-input',function(){S.importView=S.importText?'paste':'choose';render();});
-  on('imp-scan',function(){S.importView='scan';S.importImageSrc=null;S.importError='';render();});
-  on('imp-scan-camera',function(){S.importError='';render();setTimeout(startScanner,100);});
+  on('imp-scan',function(){S.importView='scan';S.importImageSrc=null;S.importError='';render();setTimeout(startScanner,100);});
   on('imp-paste',function(){S.importView='paste';S.importError='';render();});
   on('imp-preview-btn',function(){var ta=document.getElementById('imp-textarea');var txt=ta?ta.value:'';S.importText=txt;var parsed=parseImportText(txt);if(!parsed){S.importError="Couldn't read this format. Make sure it was exported from Training+.";render();return;}S.importParsed=parsed;S.importError='';S.importView='preview';render();});
   on('imp-confirm-btn',function(){var p=S.importParsed;if(!p)return;var days=S.currentData&&S.currentData.days?S.currentData.days:[];var existing=null;for(var i=0;i<days.length;i++){if(days[i].id===p.dayId&&!days[i].deleted){existing=days[i];break;}}if(existing){S.showConfirm={type:'import-conflict',dayId:p.dayId,nextId:maxDayId()+1};render();}else doImport(p.dayId,false);});
   on('imp-replace',function(){var p=S.importParsed;S.showConfirm=null;if(p)doImport(p.dayId,true);});
   on('imp-as-new',function(){var p=S.importParsed;var nid=S.showConfirm?S.showConfirm.nextId:maxDayId()+1;S.showConfirm=null;if(p)doImport(nid,false);});
-  on('imp-decode-btn',function(){decodeQRFromImage();});
   on('imp-upload-file',function(){var fi=document.getElementById('qr-file-input');if(fi){fi.value='';fi.click();}});
 }
 
